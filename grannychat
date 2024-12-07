@@ -1,0 +1,231 @@
+<html><head><base href="https://grannychat-example.com/">
+<title>GrannyChat - WhatsApp for the Golden Generation</title>
+<style>
+:root {
+  --main-color: #7b4b94;
+  --light-color: #d4c1ec;
+}
+
+body {
+  font-family: 'Comic Sans MS', cursive;
+  margin: 0;
+  padding: 0;
+  background: #f0f2f5;
+}
+
+.app-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: var(--main-color);
+  color: white;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.granny-avatar {
+  width: 40px;
+  height: 40px;
+}
+
+.chat-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.message {
+  max-width: 70%;
+  margin: 10px;
+  padding: 10px 15px;
+  border-radius: 15px;
+  position: relative;
+  animation: popIn 0.3s ease-out;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+
+.received {
+  background: var(--light-color);
+  float: left;
+  clear: both;
+}
+
+.sent {
+  background: #e8f5e9;
+  float: right;
+  clear: both;
+}
+
+.input-area {
+  padding: 15px;
+  background: #f8f9fa;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.message-input {
+  flex-grow: 1;
+  padding: 12px;
+  border: 2px solid var(--main-color);
+  border-radius: 25px;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+.send-button {
+  background: var(--main-color);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.send-button:hover {
+  transform: scale(1.05);
+}
+
+.cookie-icon {
+  font-size: 24px;
+  margin-right: 5px;
+}
+
+</style>
+</head>
+<body>
+<div class="app-container">
+  <div class="header">
+    <svg class="granny-avatar" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="45" fill="#f5d0e5"/>
+      <circle cx="35" cy="45" r="5" fill="#333"/>
+      <circle cx="65" cy="45" r="5" fill="#333"/>
+      <path d="M 30 65 Q 50 75 70 65" stroke="#333" fill="none" stroke-width="3"/>
+      <path d="M 20 30 Q 50 10 80 30" fill="#8c8c8c"/>
+    </svg>
+    <h1>GrannyChat</h1>
+  </div>
+
+  <div class="chat-container" id="chatContainer">
+    <div class="message received">
+      Hello dearie! 👵 Would you like some virtual cookies? 🍪
+    </div>
+    <div class="message received">
+      I just learned how to use this newfangled thing. My grandson Tommy showed me how! 📱
+    </div>
+    <div class="message sent">
+      Hi Grandma! Yes, I'd love some cookies! 😊
+    </div>
+  </div>
+
+  <div class="input-area">
+    <input type="text" class="message-input" id="messageInput" placeholder="Type your message, dearie...">
+    <button class="send-button" onclick="sendMessage()">
+      <span class="cookie-icon">🍪</span> Send
+    </button>
+  </div>
+</div>
+
+<script>
+function generateGrannyMessage() {
+    const templates = [
+        "Oh dearie, that's wonderful! 👵",
+        "Would you like more cookies? 🍪",
+        "Don't forget to wear a warm sweater! ❤️",
+        "Have you eaten today? You look so thin on my screen! 🥘",
+        "Let me tell you about what your cousin Martha did... 👀",
+        "I saw this on the Facebook! 📱",
+        "Come visit soon, I made your favorite pie! 🥧",
+        "Did you see what Agnes from my bridge club posted? Scandalous! 😮",
+        "Your grandfather says hi from heaven 👼",
+        "I'm learning to do the TikTok dances! 💃",
+        "Back in my day, we didn't have these fancy phones... 📞",
+        "I'm sending you a virtual hug, sweetie! 🤗",
+        "Have you met any nice boys/girls lately? 💕",
+        "I'm forwarding you another minion meme! 😄",
+        "Remember to say your prayers, dearie! 🙏",
+        "Your aunt Susan had another surgery. Should I tell you all about it? 🏥",
+        "Did you get the chain letter I forwarded? You must send it to 10 people! ✉️",
+        "I printed the internet today! 🖨️",
+        "How do I make this bigger? WHERE IS THE CAPS LOCK? 👓",
+        "Your mother tells me you're not calling her enough! 📞",
+        "I made too much casserole again... wish you were here! 🥘",
+        "Let me tell you about this wonderful new cream for arthritis... 💊",
+        "Have you been getting enough vitamin C? 🍊",
+        "The weather channel says rain tomorrow. Don't forget your umbrella! ☔"
+    ];
+    
+    const randomIndex = Math.floor(Math.random() * templates.length);
+    return templates[randomIndex];
+}
+
+function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const container = document.getElementById('chatContainer');
+    
+    if (input.value.trim() !== '') {
+        // Create user message
+        const userMessage = document.createElement('div');
+        userMessage.className = 'message sent';
+        userMessage.textContent = input.value;
+        container.appendChild(userMessage);
+        
+        // Clear input
+        input.value = '';
+        
+        // Simulate grandma typing with multiple messages
+        let delay = 1500;
+        const numberOfResponses = Math.floor(Math.random() * 3) + 1; // 1-3 responses
+        
+        for(let i = 0; i < numberOfResponses; i++) {
+            setTimeout(() => {
+                const grannyMessage = document.createElement('div');
+                grannyMessage.className = 'message received';
+                grannyMessage.textContent = generateGrannyMessage();
+                container.appendChild(grannyMessage);
+                
+                // Scroll to bottom
+                container.scrollTop = container.scrollHeight;
+                
+                // 20% chance of sending a follow-up after a short delay
+                if (Math.random() < 0.2) {
+                    setTimeout(() => {
+                        const followUp = document.createElement('div');
+                        followUp.className = 'message received';
+                        followUp.textContent = "Oh! And one more thing... " + generateGrannyMessage();
+                        container.appendChild(followUp);
+                        container.scrollTop = container.scrollHeight;
+                    }, 800);
+                }
+            }, delay);
+            
+            delay += Math.random() * 2000 + 1000; // Add 1-3 seconds between messages
+        }
+        
+        // Scroll to bottom
+        container.scrollTop = container.scrollHeight;
+    }
+}
+
+// Allow sending with Enter key
+document.getElementById('messageInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
+</script>
+</body>
+</html>
