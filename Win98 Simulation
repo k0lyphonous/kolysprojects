@@ -1,0 +1,1818 @@
+<html><head><base href="." />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windows 98 Simulation</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Tahoma', sans-serif;
+    background-color: #008080;
+    overflow: hidden;
+  }
+
+  .taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background-color: #C0C0C0;
+    border-top: 2px solid #FFFFFF;
+    display: flex;
+    align-items: center;
+    box-shadow: inset 0 2px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
+
+  .start-button {
+    background-color: #C0C0C0;
+    border: 1px solid #808080;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 30px;
+    width: 80px;
+    margin: 5px;
+    font-size: 14px;
+    color: black;
+    cursor: pointer;
+    box-shadow: inset -1px -1px 2px white, inset 1px 1px 2px #404040;
+  }
+
+  .start-button:hover {
+    background-color: #808080;
+  }
+
+  .start-button span {
+    margin-left: 6px;
+  }
+
+  .browser-button {
+    background-color: #C0C0C0;
+    border: 1px solid #808080;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 30px;
+    width: 120px;
+    margin: 5px;
+    font-size: 14px;
+    color: black;
+    cursor: pointer;
+    box-shadow: inset -1px -1px 2px white, inset 1px 1px 2px #404040;
+  }
+
+  .browser-button:hover {
+    background-color: #808080;
+  }
+
+  .notepad-button {
+    background-color: #C0C0C0;
+    border: 1px solid #808080;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 30px;
+    width: 120px;
+    margin: 5px;
+    font-size: 14px;
+    color: black;
+    cursor: pointer;
+    box-shadow: inset -1px -1px 2px white, inset 1px 1px 2px #404040;
+  }
+
+  .notepad-button:hover {
+    background-color: #808080;
+  }
+
+  .paint-button {
+    background-color: #C0C0C0;
+    border: 1px solid #808080;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 30px;
+    width: 120px;
+    margin: 5px;
+    font-size: 14px;
+    color: black;
+    cursor: pointer;
+    box-shadow: inset -1px -1px 2px white, inset 1px 1px 2px #404040;
+  }
+
+  .paint-button:hover {
+    background-color: #808080;
+  }
+
+  .folder-button {
+    background-color: #C0C0C0;
+    border: 1px solid #808080;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 30px;
+    width: 120px;
+    margin: 5px;
+    font-size: 14px;
+    color: black;
+    cursor: pointer;
+    box-shadow: inset -1px -1px 2px white, inset 1px 1px 2px #404040;
+  }
+
+  .folder-button:hover {
+    background-color: #808080;
+  }
+
+  .start-menu {
+    position: absolute;
+    bottom: 40px;
+    left: 5px;
+    width: 200px;
+    background-color: #C0C0C0;
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+    border: 2px solid #000;
+    display: none;
+    z-index: 1000;
+  }
+
+  .start-menu .menu-item {
+    padding: 10px;
+    cursor: pointer;
+  }
+
+  .start-menu .menu-item:hover {
+    background-color: #808080;
+    color: white;
+  }
+
+  .desktop {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    width: 60px;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+  }
+
+  .icon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .icon span {
+    font-size: 12px;
+    text-shadow: 1px 1px 2px black;
+  }
+
+  .window {
+    position: absolute;
+    width: 300px;
+    height: 200px;
+    background-color: #C0C0C0;
+    border: 2px solid #000;
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.6);
+    z-index: 10;
+    display: none;
+  }
+
+  .window .title-bar {
+    background-color: #000080;
+    color: white;
+    padding: 5px;
+    font-size: 14px;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .window .title-bar .close-btn {
+    cursor: pointer;
+    background-color: #C0C0C0;
+    border: 1px solid black;
+    font-family: monospace;
+    margin-left: 5px;
+  }
+
+  .window-content {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .platformer-canvas {
+    border: 2px solid black;
+    background-color: #87CEEB;
+  }
+
+  .file-explorer {
+    width: 400px;
+    height: 300px;
+  }
+
+  .file-list {
+    background: white;
+    height: calc(100% - 20px);
+    padding: 10px;
+    overflow-y: auto;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    cursor: pointer;
+  }
+
+  .file-item:hover {
+    background-color: #000080;
+    color: white;
+  }
+
+  .file-item svg {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+  }
+
+  .generated-platformer {
+    width: 500px;
+    height: 400px;
+  }
+
+  .generated-platformer canvas {
+    width: 480px;
+    height: 360px;
+  }
+
+  .image-viewer {
+    width: 500px;
+    height: 400px;
+  }
+
+  .image-viewer .window-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    height: calc(100% - 30px);
+  }
+
+  .image-viewer img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .documents-window {
+    width: 400px;
+    height: 300px;
+  }
+
+  .warning-close-btn {
+    background-color: #C0C0C0;
+    border: 2px solid #808080;
+    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff;
+    cursor: pointer;
+  }
+
+  .warning-close-btn:active {
+    box-shadow: inset 1px -1px #0a0a0a, inset -1px -1px #fff;
+  }
+
+  .system32-warning {
+    z-index: 1001;
+    display: none;
+  }
+
+  .system32-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+  }
+
+  .browser-window {
+    width: 600px;
+    height: 400px;
+  }
+
+  .browser-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: calc(100% - 30px);
+    background: white;
+    gap: 20px;
+  }
+
+  .search-box {
+    width: 80%;
+    padding: 8px 15px;
+    font-size: 16px;
+    border: 2px solid #808080;
+    border-radius: 3px;
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+    font-family: 'Tahoma', sans-serif;
+    outline: none;
+  }
+
+  .search-box:focus {
+    border-color: #000080;
+  }
+
+  .rainbow-text {
+    font-size: 24px;
+    font-weight: bold;
+    background: linear-gradient(to right, 
+      red, orange, yellow, green, blue, indigo, violet);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: rainbow 5s linear infinite;
+  }
+
+  @keyframes rainbow {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+  }
+
+  .pong-window .window-content {
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: black !important;
+  }
+
+  .start-pong-btn {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #C0C0C0;
+    border: 2px solid #808080;
+    box-shadow: inset -1px -1px #0a0a0a, inset 1px -1px #fff;
+    cursor: pointer;
+    font-family: 'Tahoma', sans-serif;
+  }
+
+  .start-pong-btn:active {
+    box-shadow: inset 1px -1px #0a0a0a, inset -1px -1px #fff;
+  }
+
+  #pong-canvas {
+    border: 2px solid white;
+  }
+
+  .paint-window {
+    width: 900px;
+    height: 700px;
+  }
+
+  .paint-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 30px);
+    background: #C0C0C0;
+  }
+
+  .paint-toolbar {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    gap: 10px;
+    border-bottom: 1px solid #808080;
+  }
+
+  .color-palette {
+    display: flex;
+    gap: 5px;
+  }
+
+  .color-square {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #000;
+    cursor: pointer;
+  }
+
+  .color-square:hover {
+    transform: scale(1.1);
+  }
+
+  .tool-button {
+    padding: 5px 10px;
+    background: #C0C0C0;
+    border: 1px solid #808080;
+    cursor: pointer;
+  }
+
+  .tool-button.active {
+    background: #808080;
+    color: white;
+  }
+
+  .size-controls {
+    display: flex;
+    gap: 5px;
+  }
+
+  .size-button {
+    padding: 5px 10px;
+    background: #C0C0C0;
+    border: 1px solid #808080;
+    cursor: pointer;
+  }
+
+  .size-button.active {
+    background: #808080;
+    color: white;
+  }
+
+  #paint-canvas {
+    background: white;
+    cursor: crosshair;
+    flex-grow: 1;
+  }
+
+  .programs-window {
+    width: 400px;
+    height: 300px;
+  }
+
+  .questionnaire-window {
+    width: 500px;
+    height: 400px;
+  }
+
+  .questionnaire-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 30px);
+    padding: 20px;
+    background: white;
+  }
+
+  .question-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .answer-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding: 20px;
+    background: #C0C0C0;
+  }
+
+  .answer-btn {
+    padding: 10px 30px;
+    font-size: 16px;
+    background: #C0C0C0;
+    border: 2px outset #fff;
+    cursor: pointer;
+  }
+
+  .answer-btn:active {
+    border-style: inset;
+  }
+
+  .restart-btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    background: #C0C0C0;
+    border: 2px outset #fff;
+    cursor: pointer;
+    display: none;
+  }
+
+  /* Add CSS for the warning window */
+  .personal-files-warning {
+    z-index: 1001;
+    display: none;
+  }
+
+  /* Added styles for the stickman game and other stuff */
+  .stickman-content {
+    position: relative;
+    height: calc(100% - 30px);
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+  }
+
+  .stickman-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .shoot-btn {
+    padding: 10px 20px;
+    background: #C0C0C0;
+    border: 2px outset #fff;
+    cursor: pointer;
+  }
+
+  .warning-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 20px;
+  }
+
+  .warning-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .yes-btn, .no-btn {
+    padding: 8px 20px;
+    background: #C0C0C0;
+    border: 2px outset #fff;
+    cursor: pointer;
+  }
+
+  .color-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .color-cube {
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+    border: 2px solid black;
+  }
+
+  .default-btn {
+    padding: 8px 20px;
+    background: #C0C0C0;
+    border: 2px outset #fff;
+    cursor: pointer;
+  }
+
+  .crash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0000FF;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    text-align: center;
+    padding: 40px;
+  }
+</style>
+</head>
+<body>
+  <div class="shutdown-overlay" id="shutdown-overlay">
+    <button class="turn-on-btn">Turn on</button>
+  </div>
+
+  <div class="taskbar">
+    <button class="start-button">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <rect x="1" y="1" width="6" height="6" fill="#FF0000"/>
+        <rect x="9" y="1" width="6" height="6" fill="#00FF00"/>
+        <rect x="1" y="9" width="6" height="6" fill="#0000FF"/>
+        <rect x="9" y="9" width="6" height="6" fill="#FFFF00"/>
+      </svg>
+      <span>Start</span>
+    </button>
+    <button class="browser-button">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" style="width: 16px; height: 16px; margin-right: 5px;">
+        <circle cx="8" cy="8" r="7" fill="#4169E1"/>
+        <circle cx="8" cy="8" r="3" fill="white"/>
+        <line x1="8" y1="1" x2="8" y2="15" stroke="white" stroke-width="1"/>
+        <line x1="1" y1="8" x2="15" y2="8" stroke="white" stroke-width="1"/>
+      </svg>
+      Browser
+    </button>
+    <button class="notepad-button">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" style="width: 16px; height: 16px; margin-right: 5px;">
+        <rect x="2" y="1" width="12" height="14" fill="#FFFFFF" stroke="#000000"/>
+        <line x1="4" y1="4" x2="12" y2="4" stroke="#000000" stroke-width="1"/>
+        <line x1="4" y1="7" x2="12" y2="7" stroke="#000000" stroke-width="1"/>
+        <line x1="4" y1="10" x2="12" y2="10" stroke="#000000" stroke-width="1"/>
+      </svg>
+      Notepad
+    </button>
+    <button class="paint-button">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" style="width: 16px; height: 16px; margin-right: 5px;">
+        <rect x="1" y="1" width="14" height="14" fill="#FFFFFF" stroke="#000000"/>
+        <circle cx="8" cy="8" r="4" fill="#FF0000"/>
+        <circle cx="12" cy="4" r="2" fill="#00FF00"/>
+        <circle cx="4" cy="12" r="2" fill="#0000FF"/>
+      </svg>
+      Paint
+    </button>
+    <button class="folder-button">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" style="width: 16px; height: 16px; margin-right: 5px;">
+        <rect x="1" y="3" width="14" height="11" fill="#FFA500"/>
+        <rect x="1" y="2" width="8" height="2" fill="#FFA500"/>
+        <rect x="2" y="4" width="12" height="9" fill="#FF8C00"/>
+      </svg>
+      Programs
+    </button>
+  </div>
+
+  <div class="start-menu">
+    <div class="menu-item" id="my-computer-menu">My Computer</div>
+    <div class="menu-item">Recycle Bin</div>
+    <div class="menu-item">Shut Down</div>
+  </div>
+
+  <div class="desktop" id="desktop">
+    <div class="icon" style="top: 50px; left: 50px;" data-window="#window-1">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <rect x="1" y="1" width="14" height="14" fill="#0000ff" />
+        <rect x="2" y="2" width="12" height="6" fill="#ffffff" />
+        <rect x="2" y="8" width="12" height="6" fill="#008000" />
+      </svg>
+      <span>My Computer</span>
+    </div>
+    <div class="icon" style="top: 50px; left: 120px;" data-window="#game-window">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <circle cx="8" cy="8" r="7" fill="#ff0000" />
+        <rect x="4" y="4" width="8" height="8" fill="#ffffff" />
+      </svg>
+      <span>Platformer</span>
+    </div>
+    <div class="icon" style="top: 50px; left: 190px;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+        <rect x="1" y="3" width="14" height="11" fill="#FFA500"/>
+        <rect x="1" y="2" width="8" height="2" fill="#FFA500"/>
+        <rect x="2" y="4" width="12" height="9" fill="#FF8C00"/>
+      </svg>
+      <span>Programs</span>
+    </div>
+  </div>
+
+  <div class="window file-explorer" id="window-1" style="top: 100px; left: 100px;">
+    <div class="title-bar">
+      My Computer
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content file-list">
+      <div class="file-item" id="local-disk">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#FFD700"/>
+          <rect x="3" y="3" width="10" height="10" fill="#DAA520"/>
+        </svg>
+        <span>Local Disk (C:)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="window file-explorer" id="c-drive" style="top: 120px; left: 120px;">
+    <div class="title-bar">
+      Local Disk (C:)
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content file-list">
+      <div class="file-item" id="game-exe">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#4CAF50"/>
+          <text x="3" y="12" fill="white" style="font-size: 8px;">EXE</text>
+        </svg>
+        <span>PlatformerPlus.exe</span>
+      </div>
+      <div class="file-item" id="pong-exe">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#4CAF50"/>
+          <text x="3" y="12" fill="white" style="font-size: 8px;">EXE</text>
+        </svg>
+        <span>Pong.exe</span>
+      </div>
+      <div class="file-item" id="documents-folder">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#FFA500"/>
+          <rect x="3" y="3" width="10" height="10" fill="#FF8C00"/>
+        </svg>
+        <span>Documents</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="window game-window generated-platformer" id="generated-platformer" style="top: 150px; left: 150px;">
+    <div class="title-bar">
+      PlatformerPlus.exe
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content">
+      <canvas id="generated-game" width="480" height="360"></canvas>
+    </div>
+  </div>
+
+  <div class="window" id="game-window" style="top: 150px; left: 150px;">
+    <div class="title-bar">
+      Platformer Game
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content">
+      <canvas class="platformer-canvas" id="platformer" width="280" height="150"></canvas>
+    </div>
+  </div>
+
+  <div class="window file-explorer documents-window" id="documents-window" style="top: 140px; left: 140px;">
+    <div class="title-bar">
+      Documents
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content file-list">
+      <div class="file-item" data-image="cat">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#87CEEB"/>
+          <text x="3" y="12" fill="white" style="font-size: 8px;">PNG</text>
+        </svg>
+        <span>cat.png</span>
+      </div>
+      <div class="file-item" data-image="dog">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#87CEEB"/>
+          <text x="3" y="12" fill="white" style="font-size: 8px;">PNG</text>
+        </svg>
+        <span>dog.png</span>
+      </div>
+      <div class="file-item" data-image="landscape">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#87CEEB"/>
+          <text x="3" y="12" fill="white" style="font-size: 8px;">PNG</text>
+        </svg>
+        <span>landscape.png</span>
+      </div>
+      <!-- Add more similar items for a total of 10 PNG files -->
+    </div>
+  </div>
+
+  <div class="window image-viewer" id="image-viewer" style="top: 160px; left: 160px;">
+    <div class="title-bar">
+      Image Viewer
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content">
+      <img id="viewer-image" src="" alt="Generated Image">
+    </div>
+  </div>
+
+  <div class="window system32-warning" id="system32-warning" style="top: 200px; left: 200px; width: 300px; height: 150px;">
+    <div class="title-bar">
+      System Warning
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content" style="text-align: center;">
+      <p style="margin: 20px 0;">Access Denied: You do not have permission to access System32 files.</p>
+      <button class="warning-close-btn" style="padding: 5px 15px;">OK</button>
+    </div>
+  </div>
+
+  <div class="window browser-window" id="browser-window" style="top: 100px; left: 100px;">
+    <div class="title-bar">
+      SearchUp Browser
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content browser-content">
+      <div class="rainbow-text">Welcome to SearchUp! The Browser nobody could've imagined!</div>
+      <input type="text" class="search-box" placeholder="Type anything to search...">
+    </div>
+  </div>
+
+  <div class="window pong-window" id="pong-window" style="top: 150px; left: 150px; width: 500px; height: 400px;">
+    <div class="title-bar">
+      Pong.exe
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content" style="background: black;">
+      <div id="pong-start-screen" style="display: flex; justify-content: center; align-items: center; height: 100%;">
+        <button id="start-pong" class="start-pong-btn">Start Game</button>
+      </div>
+      <canvas id="pong-canvas" width="480" height="320" style="display: none;"></canvas>
+    </div>
+  </div>
+
+  <div class="window file-explorer" id="recycle-bin-window" style="top: 130px; left: 130px;">
+    <div class="title-bar">
+      Recycle Bin
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content file-list">
+      <!-- Empty content -->
+    </div>
+  </div>
+
+  <div class="window notepad-window" id="notepad-window" style="top: 100px; left: 100px;">
+    <div class="title-bar">
+      Untitled - Notepad
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content">
+      <textarea class="notepad-content" placeholder="Type your text here..."></textarea>
+    </div>
+  </div>
+
+  <div class="window paint-window" id="paint-window" style="top: 100px; left: 100px;">
+    <div class="title-bar">
+      Paint
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content paint-content">
+      <div class="paint-toolbar">
+        <div class="color-palette">
+          <div class="color-square" data-color="#000000"></div>
+          <div class="color-square" data-color="#FF0000"></div>
+          <div class="color-square" data-color="#00FF00"></div>
+          <div class="color-square" data-color="#0000FF"></div>
+          <div class="color-square" data-color="#FFFF00"></div>
+          <div class="color-square" data-color="#FF00FF"></div>
+          <div class="color-square" data-color="#00FFFF"></div>
+        </div>
+        <button class="tool-button active" id="brush-tool">
+          <svg viewBox="0 0 16 16" width="16" height="16">
+            <path d="M1 15L15 1M15 1H8M15 1V8" stroke="black" fill="none"/>
+          </svg>
+        </button>
+        <div class="size-controls">
+          <button class="size-button active" data-size="2">Small</button>
+          <button class="size-button" data-size="5">Medium</button>
+          <button class="size-button" data-size="10">Large</button>
+        </div>
+        <button class="tool-button" id="clear-all">Clear All</button>
+        <button class="tool-button" id="eraser-tool">Eraser</button>
+      </div>
+      <canvas id="paint-canvas" width="800" height="600"></canvas>
+    </div>
+  </div>
+
+  <div class="window programs-window" id="programs-window" style="top: 100px; left: 100px;">
+    <div class="title-bar">
+      Programs
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content file-list">
+      <div class="file-item">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#FFA500"/>
+          <rect x="3" y="3" width="10" height="10" fill="#FF8C00"/>
+        </svg>
+        <span>Personal Files</span>
+      </div>
+      <div class="file-item" id="other-stuff-folder">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#FFA500"/>
+          <rect x="3" y="3" width="10" height="10" fill="#FF8C00"/>
+        </svg>
+        <span>Other Stuff</span>
+      </div>
+      <div class="file-item" id="questionnaire-exe">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#4CAF50"/>
+          <text x="3" y="12" fill="white" style="font-size: 8px;">EXE</text>
+        </svg>
+        <span>Fun Questionnaire!</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="window personal-files-warning" id="personal-files-warning" style="top: 200px; left: 200px; width: 300px; height: 150px;">
+    <div class="title-bar">
+      Access Denied
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content" style="text-align: center;">
+      <p style="margin: 20px 0;">You do not have administrator access inorder to view this file.</p>
+      <button class="warning-close-btn" style="padding: 5px 15px;">OK</button>
+    </div>
+  </div>
+
+  <div class="window questionnaire-window" id="questionnaire-window" style="top: 120px; left: 120px;">
+    <div class="title-bar">
+      Fun Questionnaire!
+      <span class="close-btn">X</span>
+    </div>
+    <div class="questionnaire-content">
+      <div class="question-container">
+        Loading question...
+      </div>
+      <div class="answer-buttons">
+        <button class="answer-btn" data-answer="true">TRUE</button>
+        <button class="answer-btn" data-answer="false">FALSE</button>
+      </div>
+      <button class="restart-btn">Restart</button>
+    </div>
+  </div>
+
+  <div class="window other-stuff-window" id="other-stuff-window" style="top: 120px; left: 120px; width: 400px; height: 300px;">
+    <div class="title-bar">
+      Other Stuff
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content file-list">
+      <div class="file-item" id="stickman-exe">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#4CAF50"/>
+          <text x="3" y="12" fill="white" style="font-size: 8px;">EXE</text>
+        </svg>
+        <span>Kill That Stickman!</span>
+      </div>
+      <div class="file-item" id="crasher-exe">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#4CAF50"/>
+          <text x="3" y="12" fill="white" style="font-size: 8px;">EXE</text>
+        </svg>
+        <span>SystemCrasher</span>
+      </div>
+      <div class="file-item" id="background-exe">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#4CAF50"/>
+          <text x="3" y="12" fill="white" style="font-size: 8px;">EXE</text>
+        </svg>
+        <span>BackgroundColorChanger</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="window stickman-window" id="stickman-window" style="top: 150px; left: 150px; width: 500px; height: 400px;">
+    <div class="title-bar">
+      Kill That Stickman!
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content stickman-content">
+      <div class="stickman-container">
+        <svg id="stickman" viewBox="0 0 100 100" width="100" height="100">
+          <circle class="head" cx="50" cy="25" r="8" fill="black"/>
+          <line class="body" x1="50" y1="33" x2="50" y2="60" stroke="black" stroke-width="2"/>
+          <line class="left-arm" x1="50" y1="45" x2="35" y2="55" stroke="black" stroke-width="2"/>
+          <line class="right-arm" x1="50" y1="45" x2="65" y2="55" stroke="black" stroke-width="2"/>
+          <line class="left-leg" x1="50" y1="60" x2="35" y2="80" stroke="black" stroke-width="2"/>
+          <line class="right-leg" x1="50" y1="60" x2="65" y2="80" stroke="black" stroke-width="2"/>
+          <circle class="blood" cx="50" cy="90" r="0" fill="red" opacity="0"/>
+        </svg>
+      </div>
+      <button class="shoot-btn">SHOOT</button>
+    </div>
+  </div>
+
+  <div class="window crash-warning" id="crash-warning" style="top: 200px; left: 200px; width: 300px; height: 150px;">
+    <div class="title-bar">
+      Warning
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content warning-content">
+      <p>Do you really wanna run this program?</p>
+      <div class="warning-buttons">
+        <button class="yes-btn">YES</button>
+        <button class="no-btn">NO</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="window color-changer" id="color-changer" style="top: 180px; left: 180px; width: 300px; height: 250px;">
+    <div class="title-bar">
+      Background Color Changer
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content color-content">
+      <div class="color-grid">
+        <div class="color-cube" data-color="#0000FF">Blue</div>
+        <div class="color-cube" data-color="#FF0000">Red</div>
+        <div class="color-cube" data-color="#00FF00">Green</div>
+        <div class="color-cube" data-color="#FFFF00">Yellow</div>
+      </div>
+      <button class="default-btn">DEFAULT</button>
+    </div>
+  </div>
+
+  <div class="crash-screen" id="crash-screen" style="display: none;">
+    <div class="crash-text">
+      Win98 has crashed due to an unexpected fatal error within the system, or a manual crash. Please wait for the error to be looked into by administrators.
+    </div>
+  </div>
+
+  <script>
+    document.querySelector('.start-button').addEventListener('click', function () {
+      const startMenu = document.querySelector('.start-menu');
+      startMenu.style.display = startMenu.style.display === 'none' || !startMenu.style.display ? 'block' : 'none';
+    });
+
+    document.querySelector('.browser-button').addEventListener('click', function() {
+      const browserWindow = document.getElementById('browser-window');
+      browserWindow.style.display = 'block';
+      browserWindow.style.zIndex = 1000;
+    });
+
+    document.querySelector('.notepad-button').addEventListener('click', function() {
+      const notepadWindow = document.getElementById('notepad-window');
+      notepadWindow.style.display = 'block';
+      notepadWindow.style.zIndex = 1000;
+    });
+
+    document.querySelector('.paint-button').addEventListener('click', function() {
+      const paintWindow = document.getElementById('paint-window');
+      paintWindow.style.display = 'block';
+      paintWindow.style.zIndex = 1000;
+      initPaint();
+    });
+
+    document.querySelector('.folder-button').addEventListener('click', function() {
+      const programsWindow = document.getElementById('programs-window');
+      programsWindow.style.display = 'block';
+      programsWindow.style.zIndex = 1000;
+    });
+
+    document.getElementById('my-computer-menu').addEventListener('click', function() {
+      document.querySelector('#window-1').style.display = 'block';
+      document.querySelector('#window-1').style.zIndex = 100;
+      document.querySelector('.start-menu').style.display = 'none';
+    });
+
+    document.querySelector('.menu-item:nth-child(2)').addEventListener('click', function() {
+      const recycleBinWindow = document.getElementById('recycle-bin-window');
+      recycleBinWindow.style.display = 'block';
+      recycleBinWindow.style.zIndex = 100;
+      document.querySelector('.start-menu').style.display = 'none';
+    });
+
+    document.getElementById('local-disk').addEventListener('click', function() {
+      document.querySelector('#c-drive').style.display = 'block';
+      document.querySelector('#c-drive').style.zIndex = 101;
+    });
+
+    document.getElementById('game-exe').addEventListener('click', function() {
+      document.querySelector('#generated-platformer').style.display = 'block';
+      document.querySelector('#generated-platformer').style.zIndex = 102;
+      initGeneratedGame();
+    });
+
+    document.getElementById('documents-folder').addEventListener('click', function() {
+      document.querySelector('#documents-window').style.display = 'block';
+      document.querySelector('#documents-window').style.zIndex = 102;
+    });
+
+    document.getElementById('pong-exe').addEventListener('click', function() {
+      document.querySelector('#pong-window').style.display = 'block';
+      document.querySelector('#pong-window').style.zIndex = 102;
+    });
+
+    document.getElementById('questionnaire-exe').addEventListener('click', function() {
+      const questionnaireWindow = document.getElementById('questionnaire-window');
+      questionnaireWindow.style.display = 'block';
+      questionnaireWindow.style.zIndex = 1001;
+      initQuestionnaire();
+    });
+
+    document.getElementById('other-stuff-folder').addEventListener('click', function() {
+      const otherStuffWindow = document.getElementById('other-stuff-window');
+      otherStuffWindow.style.display = 'block';
+      otherStuffWindow.style.zIndex = 1000;
+    });
+
+    const icons = document.querySelectorAll('.icon');
+    icons.forEach(icon => {
+      icon.addEventListener('dblclick', function () {
+        const windowId = icon.dataset.window;
+        const windowElement = document.querySelector(windowId);
+        if (windowElement) {
+          windowElement.style.display = 'block';
+          windowElement.style.zIndex = 100;
+        }
+      });
+    });
+
+    const closeButtons = document.querySelectorAll('.close-btn');
+    closeButtons.forEach(btn => {
+      btn.addEventListener('click', function () {
+        const windowElement = btn.closest('.window');
+        if (windowElement) windowElement.style.display = 'none';
+      });
+    });
+
+    const windows = document.querySelectorAll('.window');
+    windows.forEach(win => {
+      const titleBar = win.querySelector('.title-bar');
+      let isDragging = false;
+      let offsetX, offsetY;
+
+      titleBar.addEventListener('mousedown', function (e) {
+        isDragging = true;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+        document.body.style.cursor = 'move';
+        win.style.zIndex = 1000;
+      });
+
+      document.addEventListener('mouseup', function () {
+        isDragging = false;
+        document.body.style.cursor = 'default';
+      });
+
+      document.addEventListener('mousemove', function (e) {
+        if (isDragging) {
+          win.style.left = `${e.pageX - offsetX}px`;
+          win.style.top = `${e.pageY - offsetY}px`;
+        }
+      });
+    });
+
+    const canvas = document.getElementById('platformer');
+    const ctx = canvas.getContext('2d');
+    let playerX = 10, playerY = 100;
+    let velocityY = 0, gravity = 0.5;
+    const isKeyHeld = { ArrowUp: false, ArrowLeft: false, ArrowRight: false };
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#32CD32';
+      ctx.fillRect(0, 140, canvas.width, 10);
+      ctx.fillStyle = '#FF4500';
+      ctx.fillRect(playerX, playerY, 10, 10);
+      if (isKeyHeld.ArrowLeft) playerX -= 2;
+      if (isKeyHeld.ArrowRight) playerX += 2;
+      if (isKeyHeld.ArrowUp && playerY === 130) velocityY = -10;
+      velocityY += gravity;
+      playerY += velocityY;
+      if (playerY > 130) {
+        playerY = 130;
+        velocityY = 0;
+      }
+      requestAnimationFrame(draw);
+    }
+
+    function initGeneratedGame() {
+      const genCanvas = document.getElementById('generated-game');
+      const genCtx = genCanvas.getContext('2d');
+      
+      const TILE_SIZE = 30;
+      let platforms = [];
+      let player = {
+        x: 50,
+        y: 50,
+        width: 20,
+        height: 20,
+        velX: 0,
+        velY: 0
+      };
+
+      for (let i = 0; i < 15; i++) {
+        platforms.push({
+          x: Math.random() * (genCanvas.width - 100),
+          y: Math.random() * (genCanvas.height - 100),
+          width: 100,
+          height: 20
+        });
+      }
+
+      platforms.push({
+        x: 0,
+        y: genCanvas.height - 20,
+        width: genCanvas.width,
+        height: 20
+      });
+
+      function updateGame() {
+        player.velY += 0.5;
+        player.x += player.velX;
+        player.y += player.velY;
+
+        platforms.forEach(platform => {
+          if (player.x < platform.x + platform.width &&
+              player.x + player.width > platform.x &&
+              player.y + player.height > platform.y &&
+              player.y < platform.y + platform.height) {
+            
+            if (player.velY > 0) {
+              player.velY = 0;
+              player.y = platform.y - player.height;
+            }
+          }
+        });
+
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.width > genCanvas.width) player.x = genCanvas.width - player.width;
+        if (player.y < 0) player.y = 0;
+        if (player.y + player.height > genCanvas.height) {
+          player.y = genCanvas.height - player.height;
+          player.velY = 0;
+        }
+
+        genCtx.clearRect(0, 0, genCanvas.width, genCanvas.height);
+        
+        genCtx.fillStyle = '#32CD32';
+        platforms.forEach(platform => {
+          genCtx.fillRect(platform.x, platform.y, platform.width, platform.height);
+        });
+
+        genCtx.fillStyle = '#FF4500';
+        genCtx.fillRect(player.x, player.y, player.width, player.height);
+
+        requestAnimationFrame(updateGame);
+      }
+
+      document.addEventListener('keydown', (e) => {
+        switch(e.key) {
+          case 'ArrowLeft':
+            player.velX = -5;
+            break;
+          case 'ArrowRight':
+            player.velX = 5;
+            break;
+          case 'ArrowUp':
+            if (player.velY === 0) player.velY = -12;
+            break;
+        }
+      });
+
+      document.addEventListener('keyup', (e) => {
+        switch(e.key) {
+          case 'ArrowLeft':
+          case 'ArrowRight':
+            player.velX = 0;
+            break;
+        }
+      });
+
+      updateGame();
+    }
+
+    // Pong Game Implementation
+    function initPongGame() {
+      const canvas = document.getElementById('pong-canvas');
+      const ctx = canvas.getContext('2d');
+      const startScreen = document.getElementById('pong-start-screen');
+      
+      let paddleHeight = 60;
+      let paddleWidth = 10;
+      let ballSize = 8;
+      let gameRunning = false;
+      
+      let player = {
+        y: canvas.height/2 - paddleHeight/2,
+        score: 0
+      };
+      
+      let ai = {
+        y: canvas.height/2 - paddleHeight/2,
+        score: 0
+      };
+      
+      let ball = {
+        x: canvas.width/2,
+        y: canvas.height/2,
+        speedX: 5,
+        speedY: 5
+      };
+      
+      function drawRect(x, y, width, height, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, width, height);
+      }
+      
+      function drawCircle(x, y, radius, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI*2, false);
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      function drawScore() {
+        ctx.fillStyle = "white";
+        ctx.font = "30px Arial";
+        ctx.fillText(player.score, canvas.width/4, 50);
+        ctx.fillText(ai.score, 3*canvas.width/4, 50);
+      }
+      
+      function update() {
+        if (!gameRunning) return;
+        
+        // Move the ball
+        ball.x += ball.speedX;
+        ball.y += ball.speedY;
+        
+        // Ball collision with top and bottom
+        if (ball.y + ballSize > canvas.height || ball.y - ballSize < 0) {
+          ball.speedY = -ball.speedY;
+        }
+        
+        // Ball collision with paddles
+        if (ball.x - ballSize < paddleWidth && 
+            ball.y > player.y && 
+            ball.y < player.y + paddleHeight) {
+          ball.speedX = -ball.speedX;
+        }
+        
+        if (ball.x + ballSize > canvas.width - paddleWidth && 
+            ball.y > ai.y && 
+            ball.y < ai.y + paddleHeight) {
+          ball.speedX = -ball.speedX;
+        }
+        
+        // Score points
+        if (ball.x < 0) {
+          ai.score++;
+          resetBall();
+        } else if (ball.x > canvas.width) {
+          player.score++;
+          resetBall();
+        }
+        
+        // Simple AI
+        ai.y += (ball.y - (ai.y + paddleHeight/2)) * 0.1;
+      }
+      
+      function resetBall() {
+        ball.x = canvas.width/2;
+        ball.y = canvas.height/2;
+        ball.speedX = -ball.speedX;
+      }
+      
+      function draw() {
+        // Clear canvas
+        drawRect(0, 0, canvas.width, canvas.height, "black");
+        
+        // Draw paddles
+        drawRect(0, player.y, paddleWidth, paddleHeight, "white");
+        drawRect(canvas.width - paddleWidth, ai.y, paddleWidth, paddleHeight, "white");
+        
+        // Draw ball
+        drawCircle(ball.x, ball.y, ballSize, "white");
+        
+        // Draw center line
+        for(let i = 0; i < canvas.height; i += 40) {
+          drawRect(canvas.width/2 - 1, i, 2, 20, "white");
+        }
+        
+        // Draw scores
+        drawScore();
+      }
+      
+      function gameLoop() {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+      
+      document.getElementById('start-pong').addEventListener('click', function() {
+        startScreen.style.display = 'none';
+        canvas.style.display = 'block';
+        gameRunning = true;
+        gameLoop();
+      });
+      
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowUp' && player.y > 0) {
+          player.y -= 20;
+        } else if (e.key === 'ArrowDown' && player.y < canvas.height - paddleHeight) {
+          player.y += 20;
+        }
+      });
+    }
+
+    async function getAIResponse(prompt) {
+      try {
+        const response = await fetch('/api/ai_completion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt: `Generate a description of what a ${prompt} image would look like. 
+            
+            <typescript-interface>
+            interface Response {
+              description: string;
+            }
+            </typescript-interface>
+            
+            <example>
+            {
+              "description": "A fluffy orange tabby cat sitting in a sunny window sill, looking out at birds"
+            }
+            </example>`,
+            data: prompt
+          }),
+        });
+        const data = await response.json();
+        return data.description;
+      } catch (error) {
+        console.error('Error fetching AI response:', error);
+        return 'Error occurred';
+      }
+    }
+
+    document.querySelectorAll('#documents-window .file-item').forEach(item => {
+      item.addEventListener('click', async function() {
+        const imageType = this.dataset.image;
+        const imageViewer = document.querySelector('#image-viewer');
+        imageViewer.style.display = 'block';
+        imageViewer.style.zIndex = 103;
+        
+        // Get AI description and update title
+        const description = await getAIResponse(imageType);
+        imageViewer.querySelector('.title-bar').textContent = `${imageType}.png - ${description}`;
+        
+        // Use a placeholder colored rectangle for the image since we can't generate real images
+        const canvas = document.createElement('canvas');
+        canvas.width = 400;
+        canvas.height = 300;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = `hsl(${Math.random() * 360}, 70%, 70%)`;
+        ctx.fillRect(0, 0, 400, 300);
+        
+        document.querySelector('#viewer-image').src = canvas.toDataURL();
+      });
+    });
+
+    document.addEventListener('keydown', (e) => { if (isKeyHeld[e.key] !== undefined) isKeyHeld[e.key] = true; });
+    document.addEventListener('keyup', (e) => { if (isKeyHeld[e.key] !== undefined) isKeyHeld[e.key] = false; });
+
+    draw();
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // System32 warning functionality
+      const system32Item = document.querySelector('.file-item:last-child');
+      const warningWindow = document.getElementById('system32-warning');
+      
+      system32Item.addEventListener('click', function() {
+        warningWindow.style.display = 'block';
+        warningWindow.style.zIndex = 1001;
+      });
+
+      // Warning window close button
+      document.querySelector('.warning-close-btn').addEventListener('click', function() {
+        warningWindow.style.display = 'none';
+      });
+
+      // Make the warning window draggable
+      const warningTitleBar = warningWindow.querySelector('.title-bar');
+      let isDragging = false;
+      let offsetX, offsetY;
+
+      warningTitleBar.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+        warningWindow.style.zIndex = 1001;
+      });
+
+      document.addEventListener('mousemove', function(e) {
+        if (isDragging) {
+          warningWindow.style.left = (e.clientX - offsetX) + 'px';
+          warningWindow.style.top = (e.clientY - offsetY) + 'px';
+        }
+      });
+
+      document.addEventListener('mouseup', function() {
+        isDragging = false;
+      });
+
+      initPongGame();
+    });
+
+    // Get shutdown menu item
+    document.querySelector('.menu-item:last-child').addEventListener('click', function() {
+      const shutdownOverlay = document.getElementById('shutdown-overlay');
+      
+      // Hide start menu first
+      document.querySelector('.start-menu').style.display = 'none';
+      
+      // Show shutdown overlay with fade effect
+      shutdownOverlay.style.display = 'flex';
+      
+      // Disable all windows and interactions
+      const windows = document.querySelectorAll('.window');
+      windows.forEach(win => {
+        win.style.pointerEvents = 'none';
+      });
+      
+      document.querySelector('.taskbar').style.pointerEvents = 'none';
+      document.querySelector('.desktop').style.pointerEvents = 'none';
+    });
+
+    // Turn on button functionality
+    document.querySelector('.turn-on-btn').addEventListener('click', function() {
+      const shutdownOverlay = document.getElementById('shutdown-overlay');
+      
+      // Hide shutdown overlay
+      shutdownOverlay.style.display = 'none';
+      
+      // Re-enable all windows and interactions
+      const windows = document.querySelectorAll('.window');
+      windows.forEach(win => {
+        win.style.pointerEvents = 'auto';
+      });
+      
+      document.querySelector('.taskbar').style.pointerEvents = 'auto';
+      document.querySelector('.desktop').style.pointerEvents = 'auto';
+      
+      // Reset any open windows
+      windows.forEach(win => {
+        win.style.display = 'none';
+      });
+    });
+
+    function initPaint() {
+      const canvas = document.getElementById('paint-canvas');
+      const ctx = canvas.getContext('2d');
+      let isDrawing = false;
+      let currentColor = '#000000';
+      let currentSize = 2;
+      let isEraser = false;
+
+      // Set initial color squares background
+      document.querySelectorAll('.color-square').forEach(square => {
+        square.style.backgroundColor = square.dataset.color;
+      });
+
+      // Color selection
+      document.querySelectorAll('.color-square').forEach(square => {
+        square.addEventListener('click', () => {
+          currentColor = square.dataset.color;
+          isEraser = false;
+          updateToolButtons();
+        });
+      });
+
+      // Size selection
+      document.querySelectorAll('.size-button').forEach(button => {
+        button.addEventListener('click', () => {
+          document.querySelectorAll('.size-button').forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          currentSize = parseInt(button.dataset.size);
+        });
+      });
+
+      // Eraser tool
+      document.getElementById('eraser-tool').addEventListener('click', () => {
+        isEraser = true;
+        updateToolButtons();
+      });
+
+      // Brush tool
+      document.getElementById('brush-tool').addEventListener('click', () => {
+        isEraser = false;
+        updateToolButtons();
+      });
+
+      // Clear all
+      document.getElementById('clear-all').addEventListener('click', () => {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      });
+
+      function updateToolButtons() {
+        document.getElementById('brush-tool').classList.toggle('active', !isEraser);
+        document.getElementById('eraser-tool').classList.toggle('active', isEraser);
+      }
+
+      // Drawing functionality
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('mouseout', stopDrawing);
+
+      function startDrawing(e) {
+        isDrawing = true;
+        draw(e);
+      }
+
+      function draw(e) {
+        if (!isDrawing) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        ctx.beginPath();
+        ctx.strokeStyle = isEraser ? 'white' : currentColor;
+        ctx.lineWidth = currentSize;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+
+      function stopDrawing() {
+        isDrawing = false;
+      }
+
+      // Initial clear
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    let currentLevel = 1;
+    let currentQuestion = null;
+
+    async function generateQuestion() {
+      try {
+        const response = await fetch('/api/ai_completion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt: `Generate a true/false question for level ${currentLevel}. Make it progressively harder.
+            
+            <typescript-interface>
+            interface Question {
+              question: string;
+              correctAnswer: boolean;
+            }
+            </typescript-interface>
+            
+            <example>
+            {
+              "question": "The Earth revolves around the Sun",
+              "correctAnswer": true
+            }
+            </example>`,
+            data: currentLevel
+          })
+        });
+        
+        const data = await response.json();
+        currentQuestion = data;
+        document.querySelector('.question-container').textContent = data.question;
+      } catch (error) {
+        console.error('Error generating question:', error);
+      }
+    }
+
+    function initQuestionnaire() {
+      currentLevel = 1;
+      generateQuestion();
+      
+      const answerButtons = document.querySelectorAll('.answer-btn');
+      const restartBtn = document.querySelector('.restart-btn');
+      
+      answerButtons.forEach(btn => {
+        btn.style.display = 'block';
+      });
+      restartBtn.style.display = 'none';
+      
+      document.querySelector('.answer-buttons').style.display = 'flex';
+    }
+
+    document.querySelector('.restart-btn').addEventListener('click', initQuestionnaire);
+
+    document.querySelectorAll('.answer-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const userAnswer = btn.dataset.answer === 'true';
+        
+        if (userAnswer === currentQuestion.correctAnswer) {
+          currentLevel++;
+          generateQuestion();
+        } else {
+          document.querySelectorAll('.answer-btn').forEach(btn => {
+            btn.style.display = 'none';
+          });
+          document.querySelector('.restart-btn').style.display = 'block';
+          document.querySelector('.answer-buttons').style.display = 'none';
+          document.querySelector('.question-container').textContent = 'Game Over! Your score: ' + (currentLevel - 1);
+        }
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get Personal Files item from Programs window
+      const personalFilesItem = document.querySelector('#programs-window .file-item');
+      const warningWindow = document.getElementById('personal-files-warning');
+      
+      personalFilesItem.addEventListener('click', function() {
+        warningWindow.style.display = 'block';
+        warningWindow.style.zIndex = 1001;
+      });
+
+      // Warning window close button
+      const warningCloseBtn = warningWindow.querySelector('.warning-close-btn');
+      warningCloseBtn.addEventListener('click', function() {
+        warningWindow.style.display = 'none';
+      });
+
+      // Make the warning window draggable
+      const warningTitleBar = warningWindow.querySelector('.title-bar');
+      let isDragging = false;
+      let offsetX, offsetY;
+
+      warningTitleBar.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+        warningWindow.style.zIndex = 1001;
+      });
+
+      document.addEventListener('mousemove', function(e) {
+        if (isDragging) {
+          warningWindow.style.left = (e.clientX - offsetX) + 'px';
+          warningWindow.style.top = (e.clientY - offsetY) + 'px';
+        }
+      });
+
+      document.addEventListener('mouseup', function() {
+        isDragging = false;
+      });
+
+      // Stickman game functionality
+      let stickmanAlive = true;
+      document.getElementById('stickman-exe').addEventListener('click', function() {
+        const stickmanWindow = document.getElementById('stickman-window');
+        stickmanWindow.style.display = 'block';
+        stickmanWindow.style.zIndex = 1000;
+      });
+
+      document.querySelector('.shoot-btn').addEventListener('click', function() {
+        if (!stickmanAlive) return;
+        
+        const stickman = document.getElementById('stickman');
+        const blood = stickman.querySelector('.blood');
+        
+        // Death animation
+        stickman.style.transform = 'rotate(90deg)';
+        blood.setAttribute('r', '20');
+        blood.style.opacity = '1';
+        stickmanAlive = false;
+        
+        // Revive after 8 seconds
+        setTimeout(() => {
+          stickman.style.transform = 'rotate(0deg)';
+          blood.setAttribute('r', '0');
+          blood.style.opacity = '0';
+          stickmanAlive = true;
+        }, 8000);
+      });
+
+      // System Crasher
+      document.getElementById('crasher-exe').addEventListener('click', function() {
+        const warningWindow = document.getElementById('crash-warning');
+        warningWindow.style.display = 'block';
+        warningWindow.style.zIndex = 1001;
+      });
+
+      document.querySelector('.yes-btn').addEventListener('click', function() {
+        document.getElementById('crash-screen').style.display = 'flex';
+      });
+
+      document.querySelector('.no-btn').addEventListener('click', function() {
+        document.getElementById('crash-warning').style.display = 'none';
+      });
+
+      // Background Color Changer
+      document.getElementById('background-exe').addEventListener('click', function() {
+        const colorWindow = document.getElementById('color-changer');
+        colorWindow.style.display = 'block';
+        colorWindow.style.zIndex = 1000;
+      });
+
+      document.querySelectorAll('.color-cube').forEach(cube => {
+        cube.style.backgroundColor = cube.dataset.color;
+        cube.addEventListener('click', function() {
+          document.body.style.backgroundColor = this.dataset.color;
+        });
+      });
+
+      document.querySelector('.default-btn').addEventListener('click', function() {
+        document.body.style.backgroundColor = '#008080';
+      });
+    });
+  </script>
+</body>
+</html>
