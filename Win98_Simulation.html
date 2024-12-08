@@ -60,7 +60,7 @@
     font-size: 14px;
     color: black;
     cursor: pointer;
-    box-shadow: inset -1px -1px 2px white, inset 1px 1px 2px #404040;
+    box-shadow: inset -1px -1px 2px white, inset 1px -1px 2px #404040;
   }
 
   .browser-button:hover {
@@ -79,7 +79,7 @@
     font-size: 14px;
     color: black;
     cursor: pointer;
-    box-shadow: inset -1px -1px 2px white, inset 1px 1px 2px #404040;
+    box-shadow: inset -1px -1px 2px white, inset 1px -1px 2px #404040;
   }
 
   .notepad-button:hover {
@@ -98,7 +98,7 @@
     font-size: 14px;
     color: black;
     cursor: pointer;
-    box-shadow: inset -1px -1px 2px white, inset 1px 1px 2px #404040;
+    box-shadow: inset -1px -1px 2px white, inset 1px -1px 2px #404040;
   }
 
   .paint-button:hover {
@@ -117,7 +117,7 @@
     font-size: 14px;
     color: black;
     cursor: pointer;
-    box-shadow: inset -1px -1px 2px white, inset 1px 1px 2px #404040;
+    box-shadow: inset -1px -1px 2px white, inset 1px -1px 2px #404040;
   }
 
   .folder-button:hover {
@@ -599,6 +599,33 @@
     text-align: center;
     padding: 40px;
   }
+
+  /* Add Tetris styles */
+  .tetris-window .window-content {
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: black !important;
+  }
+
+  .start-tetris-btn {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #C0C0C0;
+    border: 2px solid #808080;
+    box-shadow: inset -1px -1px #0a0a0a, inset 1px -1px #fff;
+    cursor: pointer;
+    font-family: 'Tahoma', sans-serif;
+  }
+
+  .start-tetris-btn:active {
+    box-shadow: inset 1px -1px #0a0a0a, inset 1px -1px #fff;
+  }
+
+  #tetris-canvas {
+    border: 2px solid #333;
+  }
 </style>
 </head>
 <body>
@@ -1005,6 +1032,13 @@
         </svg>
         <span>BackgroundColorChanger</span>
       </div>
+      <div class="file-item" id="tetris-exe">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="14" height="14" fill="#4CAF50"/>
+          <text x="3" y="12" fill="white" style="font-size: 8px;">EXE</text>
+        </svg>
+        <span>Tetris</span>
+      </div>
     </div>
   </div>
 
@@ -1062,6 +1096,19 @@
   <div class="crash-screen" id="crash-screen" style="display: none;">
     <div class="crash-text">
       Win98 has crashed due to an unexpected fatal error within the system, or a manual crash. Please wait for the error to be looked into by administrators.
+    </div>
+  </div>
+
+  <div class="window tetris-window" id="tetris-window" style="top: 100px; left: 100px; width: 320px; height: 600px;">
+    <div class="title-bar">
+      Tetris
+      <span class="close-btn">X</span>
+    </div>
+    <div class="window-content tetris-content">
+      <div id="tetris-start-screen" style="display: flex; justify-content: center; align-items: center; height: 100%;">
+        <button id="start-tetris" class="start-tetris-btn">Start Game</button>
+      </div>
+      <canvas id="tetris-canvas" width="280" height="520" style="display: none; background: black;"></canvas>
     </div>
   </div>
 
@@ -1141,6 +1188,12 @@
       const otherStuffWindow = document.getElementById('other-stuff-window');
       otherStuffWindow.style.display = 'block';
       otherStuffWindow.style.zIndex = 1000;
+    });
+
+    document.getElementById('tetris-exe').addEventListener('click', function() {
+      const tetrisWindow = document.getElementById('tetris-window');
+      tetrisWindow.style.display = 'block';
+      tetrisWindow.style.zIndex = 1000;
     });
 
     const icons = document.querySelectorAll('.icon');
@@ -1852,6 +1905,197 @@
       document.querySelector('.default-btn').addEventListener('click', function() {
         document.body.style.backgroundColor = '#008080';
       });
+
+      // Initialize Tetris when DOM is loaded
+      initTetris();
+    });
+
+    function initTetris() {
+      const canvas = document.getElementById('tetris-canvas');
+      const ctx = canvas.getContext('2d');
+      const BLOCK_SIZE = 20;
+      const BOARD_WIDTH = 14;
+      const BOARD_HEIGHT = 26;
+      let board = Array(BOARD_HEIGHT).fill().map(() => Array(BOARD_WIDTH).fill(0));
+      let piece = null;
+      let gameInterval = null;
+      
+      const SHAPES = [
+        [[1,1,1,1]], // I
+        [[1,1,1],[0,1,0]], // T
+        [[1,1,1],[1,0,0]], // L
+        [[1,1,1],[0,0,1]], // J
+        [[1,1],[1,1]], // O
+        [[1,1,0],[0,1,1]], // Z
+        [[0,1,1],[1,1,0]], // S
+      ];
+      
+      const COLORS = [
+        '#00f0f0', '#a000f0', '#f0a000', '#0000f0',
+        '#f0f000', '#f00000', '#00f000'
+      ];
+
+      class Piece {
+        constructor() {
+          const idx = Math.floor(Math.random() * SHAPES.length);
+          this.shape = SHAPES[idx];
+          this.color = COLORS[idx];
+          this.x = Math.floor(BOARD_WIDTH/2) - Math.floor(this.shape[0].length/2);
+          this.y = 0;
+        }
+        
+        rotate() {
+          const newShape = Array(this.shape[0].length).fill()
+            .map(() => Array(this.shape.length).fill(0));
+          
+          for(let y = 0; y < this.shape.length; y++) {
+            for(let x = 0; x < this.shape[0].length; x++) {
+              newShape[x][this.shape.length - 1 - y] = this.shape[y][x];
+            }
+          }
+          
+          if (!collides(this.x, this.y, newShape)) {
+            this.shape = newShape;
+          }
+        }
+      }
+
+      function collides(x, y, shape) {
+        for(let row = 0; row < shape.length; row++) {
+          for(let col = 0; col < shape[row].length; col++) {
+            if (shape[row][col] && (
+              board[y + row] === undefined ||
+              board[y + row][x + col] === undefined ||
+              board[y + row][x + col]
+            )) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      function merge() {
+        piece.shape.forEach((row, y) => {
+          row.forEach((value, x) => {
+            if (value) {
+              board[piece.y + y][piece.x + x] = piece.color;
+            }
+          });
+        });
+      }
+
+      function clearLines() {
+        let linesCleared = 0;
+        outer: for(let y = board.length - 1; y >= 0; y--) {
+          for(let x = 0; x < board[y].length; x++) {
+            if (!board[y][x]) continue outer;
+          }
+          
+          board.splice(y, 1);
+          board.unshift(Array(BOARD_WIDTH).fill(0));
+          linesCleared++;
+          y++;
+        }
+      }
+
+      function draw() {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw board
+        board.forEach((row, y) => {
+          row.forEach((color, x) => {
+            if (color) {
+              ctx.fillStyle = color;
+              ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+            }
+          });
+        });
+        
+        // Draw current piece
+        if (piece) {
+          ctx.fillStyle = piece.color;
+          piece.shape.forEach((row, y) => {
+            row.forEach((value, x) => {
+              if (value) {
+                ctx.fillRect(
+                  (piece.x + x) * BLOCK_SIZE,
+                  (piece.y + y) * BLOCK_SIZE,
+                  BLOCK_SIZE - 1,
+                  BLOCK_SIZE - 1
+                );
+              }
+            });
+          });
+        }
+      }
+
+      function update() {
+        if (!piece) {
+          piece = new Piece();
+          if (collides(piece.x, piece.y, piece.shape)) {
+            // Game Over
+            clearInterval(gameInterval);
+            document.getElementById('tetris-start-screen').style.display = 'flex';
+            canvas.style.display = 'none';
+            return;
+          }
+        }
+        
+        if (!collides(piece.x, piece.y + 1, piece.shape)) {
+          piece.y++;
+        } else {
+          merge();
+          clearLines();
+          piece = null;
+        }
+        
+        draw();
+      }
+
+      document.getElementById('start-tetris').addEventListener('click', function() {
+        document.getElementById('tetris-start-screen').style.display = 'none';
+        canvas.style.display = 'block';
+        board = Array(BOARD_HEIGHT).fill().map(() => Array(BOARD_WIDTH).fill(0));
+        piece = null;
+        if (gameInterval) clearInterval(gameInterval);
+        gameInterval = setInterval(update, 500);
+      });
+
+      document.addEventListener('keydown', event => {
+        if (!piece) return;
+        
+        switch(event.key) {
+          case 'ArrowLeft':
+            if (!collides(piece.x - 1, piece.y, piece.shape)) {
+              piece.x--;
+              draw();
+            }
+            break;
+          case 'ArrowRight':
+            if (!collides(piece.x + 1, piece.y, piece.shape)) {
+              piece.x++;
+              draw();
+            }
+            break;
+          case 'ArrowDown':
+            if (!collides(piece.x, piece.y + 1, piece.shape)) {
+              piece.y++;
+              draw();
+            }
+            break;
+          case 'ArrowUp':
+            piece.rotate();
+            draw();
+            break;
+        }
+      });
+    }
+
+    // Initialize Tetris when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      initTetris();
     });
   </script>
 </body>
